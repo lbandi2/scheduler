@@ -1,8 +1,6 @@
-from calendar import week
 import datetime
-from os import stat
-from date_time import DateObj, Date, Time
-# from utils import validate_time, time_print, time_obj
+from date_time import Date, Time
+from appointment import Appointment
 
 class Schedule:
     def __init__(self, owner, start='9:00', end='17:00', duplicates=False, weekends=False):   ### usar **kwargs
@@ -14,6 +12,7 @@ class Schedule:
         self.duplicates = duplicates
         self.weekends = weekends
         # festives with locale?
+        # first dow?
 
     def toggle_duplicates(self):
         if self.duplicates:
@@ -37,13 +36,16 @@ class Schedule:
         return len(self.appointments)
 
     def list(self, items=None):
+        ignore_totals = True
         if items is None:
             items = self.appointments
+            ignore_totals = False
 
         if items != [] and items is not None:
             for index, appt in enumerate(items, start=1):
                 print(f"{index}. {appt}")
-            print(f"Found {len(items)} appointments")
+            if not ignore_totals:
+                print(f"Found {len(items)} appointments")
         else:
             print("No appointments found.")
 
@@ -52,8 +54,8 @@ class Schedule:
         Checks for valid keyword arguments
         """
         for key, value in args.items():
-            if key not in self.valid_args:
-                print(f"Invalid keyword argument, valid arguments are: {', '.join(self.valid_args)}")
+            if key.lower() not in self.valid_args:
+                print(f"Invalid keyword argument '{key}', valid arguments are: {', '.join(self.valid_args)}")
                 return False
         return True
 
@@ -90,7 +92,7 @@ class Schedule:
 
     def _do_add(self, appt):
         self.appointments.append(appt)
-        print(f"Appointment added.")
+        print(f"[ADD] -> {appt}")
         self.sort()
 
     def add(self, start_time, **kwargs):
@@ -134,51 +136,40 @@ class Schedule:
             return items
 
     def find(self, **kwargs):
-        items = self.search(**kwargs)
-        self.list(items)
+        if self._check_args(kwargs):
+            items = self.search(**kwargs)
+            self.list(items)
+            if len(items) > 0:
+                while True:
+                    value = input("\n1. Edit\n2. Delete\n3. Exit\n\nOption: ")
+                    if value == '1':
+                        pass
+                    elif value == '2':
+                        self.rem(items[0])
+                    elif value == '3':
+                        break
 
-    def count_items(self, **kwargs):
-        items = self.search(**kwargs)
-        return (len(items))
+    def rem(self, item=None, **kwargs):
+        """
+        Removes an appointment by keyword search or by accepting an appointment object
+        """
+        if item is None:
+            if self._check_args(kwargs):
+                items = self.search(**kwargs)
+                if 0 < len(self.search(**kwargs)) < 2:
+                    print(f"[DELETE] -> {items[0]}")
+                    self.appointments.remove(items[0])
+                else:
+                    if len(self.appointments) == 0:
+                        self.list()
+                    else:
+                        print(f"Found {len(items)} items, cannot delete unless search criteria matches one item")
+                        self.list(items)
 
-    def rem(self, **kwargs):
-        items = self.search(**kwargs)
-        if 0 < self.count_items(**kwargs) < 2:
-            print("Deleting item", items[0])
-            self.appointments.remove(items[0])
         else:
-            print(f"Found {len(items)} items, cannot delete unless it's one item")
+            print("Deleting item", item)
+            self.appointments.remove(item)
 
     def edit(self, **kwargs):
         pass
-
-class Appointment:
-    TODAY = datetime.datetime.now().date().strftime('%Y-%m-%d')
-
-    def __init__(self, start_time, start_date=TODAY, **kwargs):
-        self.start = DateObj(start_time, start_date)
-        self.end = DateObj(start_time, start_date)
-        if 'length' in kwargs:
-            self.end.add_minutes(kwargs['length'])
-        else:
-            self.end.add_minutes(60)
-        if 'end_date' in kwargs and 'end_time' not in kwargs:
-            self.end = DateObj(start_time, kwargs['end_date'])
-        if 'end_time' in kwargs and 'end_date' not in kwargs:
-            self.end = DateObj(kwargs['end_time'])
-        if 'end_time' in kwargs and 'end_date' in kwargs:
-            self.end = DateObj(kwargs['end_time'], kwargs['end_date'])
-        self.title = "New appointment"
-        if 'title' in kwargs:
-            self.title = kwargs['title']
-        self.importance = "default"
-        if 'importance' in kwargs:
-            self.importance = kwargs['importance']
-
-    def __repr__(self):
-        return f"{self.start.date} [{self.start.time}-{self.end.time}]: '{self.title}' ({self.length})"
-
-    @property
-    def length(self):
-        return (self.end.obj - self.start.obj).seconds // 60
 
