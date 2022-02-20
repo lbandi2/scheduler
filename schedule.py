@@ -13,22 +13,23 @@ class Schedule:
         self.weekends = weekends
         # festives with locale?
         # first dow?
+        # change work hours / ignore
 
     def toggle_duplicates(self):
         if self.duplicates:
             self.duplicates = False
-            print("Duplicates disabled.")
+            print("[INFO] Duplicates disabled.")
         else:
             self.duplicates = True
-            print("Duplicates enabled.")
+            print("[INFO] Duplicates enabled.")
 
     def toggle_weekends(self):
         if self.weekends:
             self.weekends = False
-            print("Weekends disabled.")
+            print("[INFO] Weekends disabled.")
         else:
             self.weekends = True
-            print("Weekends enabled.")
+            print("[INFO] Weekends enabled.")
 
     @property
     def total(self):
@@ -53,9 +54,23 @@ class Schedule:
         """
         Checks for valid keyword arguments
         """
+        if args == {}:
+            print(f"[WARN] Missing keyword argument, valid arguments are: {', '.join(self.valid_args)}")
+            return False
         for key, value in args.items():
             if key.lower() not in self.valid_args:
-                print(f"Invalid keyword argument '{key}', valid arguments are: {', '.join(self.valid_args)}")
+                print(f"[WARN] Invalid keyword argument '{key}', valid arguments are: {', '.join(self.valid_args)}")
+                return False
+        return True
+
+    def _check_weekend(self, start_date):
+        """
+        Checks date object against weekends attribute
+        """
+        if not self.weekends:
+            if start_date.start.obj.weekday() > 4:
+                print("[WARN] Weekends are not enabled")
+                print("[NOTE] Try enabling weekends with 'toggle_weekends()'")
                 return False
         return True
 
@@ -65,11 +80,12 @@ class Schedule:
         """
         if start_time >= self.start.obj and start_time < self.end.obj:
             return True
-        print(f"Current workday is from {self.start.readable} to {self.end.readable}")
+        print(f"[WARN] Current workday is from {self.start.readable} to {self.end.readable}")
         return False
 
     def conflict(self, item):
-        print(f"There's another appointment from {item.start.time} to {item.end.time}")
+        print(f"[WARN] There's another appointment from {item.start.time} to {item.end.time}")
+        print("[NOTE] Try enabling duplicates with 'toggle_duplicates()'")
 
     def _dupe_check(self, start, end):
         """
@@ -101,11 +117,12 @@ class Schedule:
             if self._check_args:
                 if self._work_hours(start.obj):
                     appt = Appointment(start_time, **kwargs)
-                    if self.duplicates:
-                        self._do_add(appt)
-                    else:
-                        if self._dupe_check(appt.start.obj, appt.end.obj):
+                    if self._check_weekend(appt):
+                        if self.duplicates:
                             self._do_add(appt)
+                        else:
+                            if self._dupe_check(appt.start.obj, appt.end.obj):
+                                self._do_add(appt)
 
     def search(self, **kwargs):
         items = []
@@ -163,12 +180,22 @@ class Schedule:
                     if len(self.appointments) == 0:
                         self.list()
                     else:
-                        print(f"Found {len(items)} items, cannot delete unless search criteria matches one item")
-                        self.list(items)
+                        while True:
+                            print(f"[WARN] Found {len(items)} items, cannot delete unless search criteria matches one item")
+                            self.list(items)
+                            value = input("Delete anyway? (Y/N): ")
+                            if value.lower() == 'y':
+                                for x in items:
+                                    print(x)
+                                    self.rem(x)   ### fails when more than one item (duplicates)
+                                break
+                            if value.lower() == 'n':
+                                break
 
         else:
-            print("Deleting item", item)
-            self.appointments.remove(item)
+            if self._check_args(kwargs):
+                print("[DELETE] ->", item)
+                self.appointments.remove(item)
 
     def edit(self, **kwargs):
         pass

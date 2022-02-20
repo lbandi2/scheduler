@@ -31,3 +31,6 @@ class Appointment:
     def length(self):
         return (self.end.obj - self.start.obj).seconds // 60
 
+    @property
+    def weekday(self):
+        return self.start.obj.weekday()
