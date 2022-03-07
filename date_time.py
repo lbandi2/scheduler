@@ -16,16 +16,19 @@ class Time:
     def _time_code_words(self, item):
         now_time = datetime.datetime.now().time()
         if item == 'undefined' or item == '' or item == '0m':
-            return now_time
+            return round_time(now_time, '0m', tolerance=0)
         else:
             if type(item) == datetime.time:
                 return item
             if (type(item) == str or type(item) == int) and str(item).isdigit():
                 return item
-            elif not str(item).isdigit() and 2 <= len(item) <= 6:
+            elif not str(item).isdigit() and ':' in item:
+                return item
+            elif not str(item).isdigit() and (2 <= len(item) <= 6 and ('h' in item or 'm' in item)):
                 return round_time(now_time, item)
             else:
                 print(f"[ERROR] Code word of type {type(item).__name__} is not allowed for Time object") #FIXME: is this necessary?
+        # return item
 
     def is_valid(self):  #FIXME: Decorator?
         if self.obj:

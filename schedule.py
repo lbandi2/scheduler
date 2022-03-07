@@ -8,7 +8,7 @@ class Schedule:
         self.end = Time(17)
         self.owner = None
         self.duplicates = False
-        self.weekends = False          #TODO: add completely ignore schedule times
+        self.weekends = False          #TODO: option to completely ignore schedule times
         if 'start' in kwargs:
             self.start = Time(kwargs['start'])
         if 'end' in kwargs:
@@ -144,7 +144,7 @@ class Schedule:
         """
         items = self._search(**kwargs)
         if len(items) == 0:
-            self.list()
+            self.find(**kwargs)
         elif 0 < len(items) < 2 or ('force' in kwargs and kwargs['force'] == True):
             for item in items:
                 print(f"[DEL] -> {item} [OK]")

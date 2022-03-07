@@ -102,10 +102,11 @@ def first_weekday_x_months(weekends, **kwargs):
             else:
                 next_month = next_month.replace(day=next_month.day+1)
 
-def round_time(time, string):
+def round_time(time, string='0m', tolerance=5):
     """
-    Rounds time to next :30 or :00, always to ceiling
+    Rounds time to next :30 or :00, always to ceiling with optional tolerance value, default is 5
     """
+    tolerance = abs(tolerance)
     time_object = time_obj(time)
     date_object = date_obj(datetime.datetime.now().date())
     date_combined = datetime.datetime.combine(date_object, time_object)
@@ -120,11 +121,18 @@ def round_time(time, string):
         minutes = int(string.split('h')[1][:-1])
         hours = int(string.split('h')[0])
 
-    date_combined = date_combined.replace(second=0)
+    date_combined = date_combined.replace(second=0, microsecond=0)
     date_combined = date_combined + datetime.timedelta(hours=hours, minutes=minutes)
 
+    if 0 < date_combined.time().minute <= tolerance:
+        date_combined = date_combined.replace(minute=0)
+    elif 30 < date_combined.time().minute <= 30 + tolerance:
+        date_combined = date_combined.replace(minute=30)
+
     while True:
-        if date_combined.minute % 30 != 0:     #FIXME: Add tolerance of 5 minutes before rounding so :05 won't round to :00
+        if date_combined.minute % 30 != 0:
             date_combined = date_combined + datetime.timedelta(minutes=1)
         else:
             return date_combined.time()
+
+# def add_relative_time(string, tolerance=5):
