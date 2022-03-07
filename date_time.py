@@ -4,7 +4,6 @@ from utils import weekend, first_weekday_x_months, format_dt, round_time
 
 class Time:
     def __init__(self, time='undefined'):
-            # print("[NOTE] Using the next hour")
         time = self._time_code_words(time)
         self.obj = time_obj(time)
         if isinstance(self.obj, datetime.time):
@@ -37,7 +36,6 @@ class Time:
 
 class Date:
     def __init__(self, date='undefined', weekends=False):
-            # print("[NOTE] Using today's date")
         date = self._date_code_words(date, weekends)
         self.obj = date_obj(date)
         if isinstance(self.obj, datetime.date):

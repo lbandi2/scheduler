@@ -104,7 +104,7 @@ def first_weekday_x_months(weekends, **kwargs):
 
 def round_time(time, string='0m', tolerance=5):
     """
-    Rounds time to next :30 or :00, always to ceiling with optional tolerance value, default is 5
+    Rounds time to next :30 or :00, always to ceiling with optional tolerance value, default is 5'
     """
     tolerance = abs(tolerance)
     time_object = time_obj(time)
