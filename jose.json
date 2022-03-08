@@ -1,0 +1,29 @@
+{
+    "type": "Scheduler JSON save file",
+    "owner": "Jose",
+    "work_hours": {
+        "start": "9:00",
+        "end": "20:00"
+    },
+    "ignore_work_hours": "False",
+    "ignore_weekends": "True",
+    "ignore_duplicates": "True",
+    "appointments": [
+        {
+            "start_date": "2022-03-08",
+            "start_time": "18:30",
+            "end_date": "2022-03-08",
+            "end_time": "19:00",
+            "title": "New appointment",
+            "importance": "default"
+        },
+        {
+            "start_date": "2022-03-08",
+            "start_time": "19:00",
+            "end_date": "2022-03-08",
+            "end_time": "19:30",
+            "title": "New appointment",
+            "importance": "default"
+        }
+    ]
+}

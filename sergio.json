@@ -1,0 +1,30 @@
+{
+    "type": "Scheduler JSON save file",
+    "owner": "Sergio",
+    "work_hours": {
+      "start": 10,
+      "end": 19
+      },
+    "ignore_work_hours": "False",
+    "ignore_weekends": "True",
+    "ignore_duplicates": "True",
+    "appointments": [
+        {
+          "start_date": "2022-03-07",
+          "start_time": "14:00",
+          "end_date": "2022-03-07",
+          "end_time": "15:00",
+          "title": "First Appt",
+          "importance": "default"
+        },
+        {
+          "start_date": "2022-03-07",
+          "start_time": "15:30",
+          "end_date": "2022-03-07",
+          "end_time": "16:00",
+          "title": "Second Appt",
+          "importance": "default"
+        }
+      ]
+}
+  

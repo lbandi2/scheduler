@@ -135,4 +135,28 @@ def round_time(time, string='0m', tolerance=5):
         else:
             return date_combined.time()
 
+def relative_date(date):
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    today = datetime.datetime.now().date()
+    date = date_obj(date)
+    rel_time = date - today
+    if rel_time.days >= 0:
+        if rel_time.days == 0:
+            return "Today"
+        elif rel_time.days == 1:
+            return "Tomorrow"
+        elif today.isocalendar()[1] == date.isocalendar()[1]:      ## it's the same week
+            return f"on {days[date.weekday()]}"
+        elif date.isocalendar()[1] - today.isocalendar()[1] == 1:  ## it's next week
+            return f"next {days[date.weekday()]}"
+        else:
+            return f"on {date}"
+    else:
+        return f"on {date}"
+    
+
+def file_exists(file):
+    return os.path.exists(file)
+
+
 # def add_relative_time(string, tolerance=5):

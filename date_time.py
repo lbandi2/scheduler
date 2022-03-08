@@ -44,26 +44,46 @@ class Date:
             self.year = self.obj.year
             self.readable = f"{self.month:02}/{self.day:02}/{self.year}"
 
+    # def _date_code_words(self, item, weekends):
+    #     today = datetime.datetime.now().date()
+    #     if item == 'undefined' or item == '' or item == '0d':
+    #         return today
+    #     else:
+    #         if type(item) == datetime.date:
+    #             return item
+    #         if type(item) == str or type(item) == int:
+    #             if str(item).isdigit():
+    #                 return item
+    #             elif 2 <= len(item) <= 3 and not item.isdigit():
+    #                 amount = int(item[:-1])
+    #                 if 'd' in item:
+    #                     return today + datetime.timedelta(days=amount)
+    #                 elif 'w' in item:
+    #                     return today + datetime.timedelta(days=(7 * amount - today.weekday()))
+    #                 elif 'm' in item:
+    #                     return first_weekday_x_months(weekends, date=today, months=1 * amount)
+    #         else:
+    #             print(f"[ERROR] Code word of type {type(item).__name__} is not allowed for Date object") #FIXME: is this necessary?
+
     def _date_code_words(self, item, weekends):
         today = datetime.datetime.now().date()
         if item == 'undefined' or item == '' or item == '0d':
             return today
-        else:
-            if type(item) == datetime.date:
+        if type(item) == datetime.date or '-' in item:
+            return item
+        if type(item) == str or type(item) == int:
+            if str(item).isdigit():
                 return item
-            if type(item) == str or type(item) == int:
-                if str(item).isdigit():
-                    return item
-                elif 2 <= len(item) <= 3 and not item.isdigit():
-                    amount = int(item[:-1])
-                    if 'd' in item:
-                        return today + datetime.timedelta(days=amount)
-                    elif 'w' in item:
-                        return today + datetime.timedelta(days=(7 * amount - today.weekday()))
-                    elif 'm' in item:
-                        return first_weekday_x_months(weekends, date=today, months=1 * amount)
-            else:
-                print(f"[ERROR] Code word of type {type(item).__name__} is not allowed for Date object") #FIXME: is this necessary?
+            elif 2 <= len(item) <= 3 and not item.isdigit():
+                amount = int(item[:-1])
+                if 'd' in item:
+                    return today + datetime.timedelta(days=amount)
+                elif 'w' in item:
+                    return today + datetime.timedelta(days=(7 * amount - today.weekday()))
+                elif 'm' in item:
+                    return first_weekday_x_months(weekends, date=today, months=1 * amount)
+        else:
+            print(f"[ERROR] Code word of type {type(item).__name__} is not allowed for Date object") #FIXME: is this necessary?
 
     def is_valid(self):
         if self.obj:
@@ -106,7 +126,8 @@ class DateObj:
 
     @property
     def date(self):
-        return self.obj.strftime(format_dt('%m/%d/%Y'))
+        # return self.obj.strftime(format_dt('%m/%d/%Y'))
+        return self.obj.strftime('%Y-%m-%d')
 
     @property
     def is_weekend(self):

@@ -8,6 +8,9 @@ class Appointment:
         self.end = None
         self.title = "New appointment"
         self.importance = "default"
+        self.silent = False
+        if "silent" in kwargs:
+            self.silent = kwargs['silent']
         if "start_date" in kwargs:
             if kwargs["start_date"] != '0d':
                 start_date = kwargs['start_date']
@@ -43,7 +46,7 @@ class Appointment:
             return False
 
     def __repr__(self):
-        return f"{self.start.date} [{self.start.time}-{self.end.time}]: '{self.title}' ({self.length})"
+        return f"{self.start.date} [{self.start.time}-{self.end.time}]: '{self.title}' ({self.length}) {'[▲]' if self.importance == 'high' else '[▼]'}"
 
     @property
     def length(self):
