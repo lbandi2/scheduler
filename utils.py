@@ -2,6 +2,45 @@ from datetime import datetime as dt
 import datetime
 import os
 
+def print_red(skk): print("\033[91m {}\033[00m" .format(skk))
+def print_green(skk): print("\033[92m {}\033[00m" .format(skk))
+def print_yellow(skk): print("\033[93m {}\033[00m" .format(skk))
+
+def colorize(msg, color):
+    if color == 'red':
+        return f"\033[91m{msg}\033[00m"
+    elif color == 'green':
+        return f"\033[92m{msg}\033[00m"
+    elif color == 'yellow':
+        return f"\033[93m{msg}\033[00m"
+    elif color == 'cyan':
+        return f"\033[96m{msg}\033[00m"
+    elif color == 'purple':
+        return f"\033[94m{msg}\033[00m"
+
+def print_box(msg, type='info', color='default'):
+    if 'ON' in msg:
+        msg = msg.replace('ON', colorize('ON', 'green'))
+    if 'OFF' in msg:
+        msg = msg.replace('OFF', colorize('OFF', 'red'))
+
+    if color != 'default':
+        box = f"[{colorize(type, color)}] {msg}"
+    else:
+        if type == 'info':
+            box = f"[{colorize('INFO', 'cyan')}] {msg}"
+        elif type == 'note':
+            box = f"[{colorize('NOTE', 'yellow')}] {msg}"
+        elif type == 'warn':
+            box = f"[{colorize('WARN', 'red')}] {msg}"
+        elif type == 'ok':
+            box = f"[{colorize('OK', 'green')}] {msg}"
+        elif type == 'add':
+            box = f"[{colorize('ADD', 'green')}] {msg}"
+        elif type == 'del':
+            box = f"[{colorize('DEL', 'purple')}] {msg}"
+    print(box)
+
 def format_dt(string):
     """
     Formats datetime string to os appropriate format
@@ -19,21 +58,25 @@ def time_obj(time):
         try:
             return dt.strptime(time, '%H:%M').time()
         except ValueError:
-            print("[WARN] Time format should be HH:MM and from 0:00 to 23:59 when passing a str as argument")
+            # print("[WARN] Time format should be HH:MM and from 0:00 to 23:59 when passing a str as argument")
+            print_box("Time format should be HH:MM and from 0:00 to 23:59 when passing a str as argument", type='warn')
     elif isinstance(time, int) or (isinstance(time, str) and time.isdigit()):
         try:
             return dt.strptime(str(time), '%H').time()
         except ValueError:
-            print("[WARN] Time format should be H and from 0 to 23 when passing an int as argument")
+            # print("[WARN] Time format should be H and from 0 to 23 when passing an int as argument")
+            print_box("Time format should be H and from 0 to 23 when passing an int as argument", type='warn')
     elif isinstance(time, datetime.time):
         return time
     elif isinstance(time, datetime.datetime):
         return time.time()
     elif time is None:
-        print("[WARN] Must specify a time")
+        # print("[WARN] Must specify a time")
+        print_box("Must specify a time", type='warn')
     else:
         print(time)
-        print(f"[WARN] {type(time).__name__.capitalize()} is not a valid argument for Time, it should be datetime.time, int or string")
+        # print(f"[WARN] {type(time).__name__.capitalize()} is not a valid argument for Time, it should be datetime.time, int or string")
+        print_box("{type(time).__name__.capitalize()} is not a valid argument for Time, it should be datetime.time, int or string", type='warn')
 
 def date_obj(somedate):
     """
@@ -43,20 +86,24 @@ def date_obj(somedate):
         try:
             return dt.strptime(somedate, '%Y-%m-%d').date()
         except ValueError:
-            print("[WARN] Date format should be YYYY-MM-DD")
+            # print("[WARN] Date format should be YYYY-MM-DD")
+            print_box("Date format should be YYYY-MM-DD", type='warn')
     elif isinstance(somedate, int) or (isinstance(somedate, str) and somedate.isdigit()):
         try:
             return dt.now().date().replace(day=int(somedate))
         except ValueError:
-            print("[WARN] Date format should be D and the date must be valid when passing an int for the day")
+            # print("[WARN] Date format should be D and the date must be valid when passing an int for the day")
+            print_box("Date format should be D and the date must be valid when passing an int for the day", type='warn')
     elif type(somedate) == datetime.date:
         return somedate
     elif type(somedate) == datetime.datetime:
         return somedate.date()
     elif somedate is None:
-        print("[WARN] Must specify a date")
+        # print("[WARN] Must specify a date")
+        print_box("Must specify a date", type='warn')
     else:
-        print(f"[WARN] {type(somedate).__name__.capitalize()} is not a valid argument for Date, it should be datetime.datetime, int or string")
+        # print(f"[WARN] {type(somedate).__name__.capitalize()} is not a valid argument for Date, it should be datetime.datetime, int or string")
+        print_box("{type(somedate).__name__.capitalize()} is not a valid argument for Date, it should be datetime.datetime, int or string", type='warn')
 
 def combine_date_time(date, time):
     try:
