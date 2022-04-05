@@ -33,7 +33,6 @@ class Schedule:
         print_box(f"Try using add() or add(start_date='2d') or add(start_time=14) or add(start_date='1d', start_time=11, length=90)", type='note')
 
     def _load_save_file(self):
-        # file = File(f"{self.owner}.json")
         if self.file.file is not None:
             appts = self.file.read_appts()
             self.allow_weekends = self.file.read_setting('allow_weekends') == 'True'       ## reads key and converts json string to boolean
@@ -50,8 +49,11 @@ class Schedule:
                         end_date = appt['end_date'], 
                         end_time = appt['end_time'],
                         title = appt['title'],
-                        importance = appt['importance'], #TODO: when loading files, duplicates are ignored
-                        silent = True
+                        importance = appt['importance'],
+                        silent = True,
+                        work_hours = False,
+                        weekends = False,
+                        duplicates = False
                         )
 
     def change_work_hours(self, lst, silent=False):  #TODO: add option to work night shift, ie: from 19:00 to 04:00
@@ -59,43 +61,35 @@ class Schedule:
             self.start = Time(lst[0])
             self.end = Time(lst[1])
             if not silent:
-                # print(f"[NOTE] Work hours changed to {self.start.readable} - {self.end.readable}")
                 print_box(f"Work hours changed to {self.start.readable} - {self.end.readable}", type='note')
         else:
-            # print("[WARN] Work hours argument must be a list, ie: [9, 16]")
             print_box(f"Work hours argument must be a list, ie: [9, 16]", type='warn')
         self._save_changes()
 
     def toggle_duplicates(self):
         if self.allow_duplicates:
             self.allow_duplicates = False
-            # print("[INFO] Duplicates disabled.")
             print_box(f"Duplicates disabled.")
         else:
             self.allow_duplicates = True
-            # print("[INFO] Duplicates enabled.")
             print_box(f"Duplicates enabled.")
         self._save_changes()
 
     def toggle_weekends(self):
         if self.allow_weekends:
             self.allow_weekends = False
-            # print("[INFO] Weekends disabled.")
             print_box(f"Weekends disabled.")
         else:
             self.allow_weekends = True
-            # print("[INFO] Weekends enabled.")
             print_box(f"Weekends enabled.")
         self._save_changes()
 
     def toggle_workhours(self):
         if self.allow_work_hours:
             self.allow_work_hours = False
-            # print("[INFO] Work hours disabled.")
             print_box(f"Work hours disabled.")
         else:
             self.allow_work_hours = True
-            # print("[INFO] Work hours enabled.")
             print_box(f"Work hours enabled.")
         self._save_changes()
 
@@ -122,9 +116,7 @@ class Schedule:
         """
         if not self.allow_weekends:
             if start_date.is_weekend:
-                # print("[WARN] Weekends are not enabled")
                 print_box(f"Weekends are not enabled", type='warn')
-                # print("[NOTE] Try enabling weekends with 'toggle_weekends()'")
                 print_box(f"Try enabling weekends with 'toggle_weekends()'", type='note')
                 return False
         return True
@@ -137,16 +129,12 @@ class Schedule:
             return True
         if start_time >= self.start.obj and start_time < self.end.obj:
             return True
-        # print(f"[WARN] Current workday is from {self.start.readable} to {self.end.readable}")
         print_box(f"Current workday is from {self.start.readable} to {self.end.readable}", type='warn')
-        # print(f"[NOTE] Try changing workday hours with 'change_work_hours([9, 17])'")
         print_box(f"Try changing workday hours with 'change_work_hours([9, 17])'", type='note')
         return False
 
     def conflict(self, item):
-        # print(f"[WARN] There's another appointment {relative_date(item.start.obj)} from {item.start.time} to {item.end.time}")
         print_box(f"There's another appointment {relative_date(item.start.obj)} from {item.start.time} to {item.end.time}", type='warn')
-        # print("[NOTE] Try enabling duplicates with 'toggle_duplicates()'")
         print_box(f"Try enabling duplicates with 'toggle_duplicates()'", type='note')
 
     def _dupe_check(self, start, end):
@@ -180,7 +168,6 @@ class Schedule:
     def _do_add(self, appt):
         self.appointments.append(appt)
         if not appt.silent:
-            # print(f"[ADD] -> {relative_date(appt.start.obj)} [{appt.start.time}-{appt.end.time}]: '{appt.title}' ({appt.length}) [OK]")
             print_box(f"-> {relative_date(appt.start.obj)} [{appt.start.time}-{appt.end.time}]: '{appt.title}' ({appt.length}) [{colorize('OK', 'green')}]", type='add')
         self.sort()
         self._save_changes()
@@ -188,9 +175,9 @@ class Schedule:
     def add(self, **kwargs):  #TODO: decorators for all the valid stuff?
         appt = Appointment(self.start.obj, **kwargs)
         if appt.is_valid():
-            if self._is_work_hours(appt.start.time_obj):
-                if self._check_weekend(appt.start):
-                    if self.allow_duplicates:
+            if self._is_work_hours(appt.start.time_obj) or 'work_hours' in kwargs:
+                if self._check_weekend(appt.start) or 'weekends' in kwargs:
+                    if self.allow_duplicates or 'duplicates' in kwargs:
                         self._do_add(appt)
                     else:
                         if self._dupe_check(appt.start.obj, appt.end.obj):
@@ -236,12 +223,10 @@ class Schedule:
             self.find(**kwargs)
         elif 0 < len(items) < 2 or ('force' in kwargs and kwargs['force'] == True):
             for item in items:
-                # print(f"[DEL] -> {item} [OK]")
                 print_box(f"-> {item} [{colorize('OK', 'green')}]", type='del')
                 self.appointments.remove(item)
         else:
             while True:
-                # print(f"[WARN] Found {len(items)} items, cannot delete unless search criteria matches one item")
                 print_box(f"Found {len(items)} items, cannot delete unless search criteria matches one item", type='warn')
                 self.list(items)
                 value = input("Delete anyway? (Y/N): ")
